@@ -12,7 +12,7 @@
 Summary:	Text search engine library in Java
 Name:		java-%{srcname}
 Version:	2.4.1
-Release:	1
+Release:	2
 License:	Apache v2.0
 Group:		Development/Languages/Java
 Source0:	http://www.apache.net.pl/lucene/java/lucene-%{version}-src.tar.gz
