@@ -23,7 +23,7 @@
 Summary:	Text search engine library in Java
 Name:		java-%{srcname}
 Version:	2.4.1
-Release:	2
+Release:	3
 License:	Apache v2.0
 Group:		Development/Languages/Java
 Source0:	http://www.apache.net.pl/lucene/java/lucene-%{version}-src.tar.gz
@@ -79,7 +79,7 @@ install -d build
 	$(find src/java/org/apache/lucene -name '*.java')
 %endif
 
-%jar -cf %{srcname}-%{version}.jar -C build .
+%jar -cf %{srcname}-%{version}.jar -C build/classes/java .
 
 %install
 rm -rf $RPM_BUILD_ROOT
