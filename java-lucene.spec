@@ -1,3 +1,14 @@
+# TODO:
+# - java.lang.NullPointerException
+#   at gnu.classpath.tools.doclets.htmldoclet.HtmlDoclet.printClassPage(HtmlDoclet.java:2057)
+#   at gnu.classpath.tools.doclets.htmldoclet.HtmlDoclet.run(HtmlDoclet.java:3153)
+#   at gnu.classpath.tools.doclets.AbstractDoclet.startInstance(AbstractDoclet.java:200)
+#   at gnu.classpath.tools.doclets.AbstractDoclet.start(AbstractDoclet.java:131)
+#   at java.lang.reflect.Method.invoke(libgcj.so.9)
+#   at gnu.classpath.tools.gjdoc.Main.startDoclet(Main.java:629)
+#   at gnu.classpath.tools.gjdoc.Main.start(Main.java:1159)
+#   at gnu.classpath.tools.gjdoc.Main.main(Main.java:883)
+
 %bcond_without  javadoc         # don't build javadoc
 %if "%{pld_release}" == "ti"
 %bcond_without	java_sun	# build with gcj
@@ -56,6 +67,8 @@ Javadoc pour lucene.
 
 %build
 CLASSPATH=$(build-classpath commons-digester)
+
+export LC_ALL=en_US
 
 install -d build
 %ant -Dbuild.sysclasspath=only
