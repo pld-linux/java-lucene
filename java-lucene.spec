@@ -50,7 +50,7 @@ cross-platform.
 %package contrib
 Summary:	Contrib packages for lucene
 Group:		Development/Languages/Java
-Requires:	%{name}
+Requires:	%{name} = %{version}
 
 %description contrib
 Contrib packages for lucene.
@@ -114,6 +114,7 @@ for i in $CONTRIB_PACKAGES
 do
 cp -a build/contrib/$i/%{srcname}-$i-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-$i-%{contrib_ver}.jar
 ln -s %{srcname}-$i-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-$i.jar
+%jar -cf %{srcname}-$i-%{contrib_ver}.jar -C build/contrib/$i/classes/java .
 done
 cp -a build/contrib/db/bdb/%{srcname}-bdb-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-bdb-%{contrib_ver}.jar
 ln -s %{srcname}-bdb-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-bdb.jar
