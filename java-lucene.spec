@@ -10,20 +10,20 @@
 #   at gnu.classpath.tools.gjdoc.Main.main(Main.java:883)
 
 %bcond_without  javadoc         # don't build javadoc
-%if "%{pld_release}" == "ti"
-%bcond_without	java_sun	# build with gcj
-%else
 %bcond_with	java_sun	# build with java-sun
+%if "%{pld_release}" == "ti"
+%define	with_java_sun	1
 %endif
 #
 %include	/usr/lib/rpm/macros.java
 #
 %define 	srcname	lucene
+%define		contrib_ver	2.4
 
 Summary:	Text search engine library in Java
 Name:		java-%{srcname}
 Version:	2.4.1
-Release:	4
+Release:	5
 License:	Apache v2.0
 Group:		Development/Languages/Java
 Source0:	http://www.apache.net.pl/lucene/java/lucene-%{version}-src.tar.gz
@@ -45,6 +45,14 @@ Apache Lucene is a high-performance, full-featured text search engine
 library written entirely in Java. It is a technology suitable for
 nearly any application that requires full-text search, especially
 cross-platform.
+
+%package contrib
+Summary:	Contrib packages for lucene
+Group:		Development/Languages/Java
+Requires:	%{name}
+
+%description contrib
+Contrib packages for lucene.
 
 %package javadoc
 Summary:	Online manual for lucene
@@ -99,6 +107,18 @@ install -d $RPM_BUILD_ROOT%{_javadir}
 cp -a %{srcname}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-%{version}.jar
 ln -s %{srcname}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}.jar
 
+# Contrib packages
+CONTRIB_PACKAGES="analyzers benchmark highlighter instantiated lucli memory misc queries regex similarity snowball spellchecker surround swing wikipedia wordnet xml-query-parser"
+for i in $CONTRIB_PACKAGES
+do
+cp -a build/contrib/$i/%{srcname}-$i-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-$i-%{contrib_ver}.jar
+ln -s %{srcname}-$i-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-$i.jar
+done
+cp -a build/contrib/db/bdb/%{srcname}-bdb-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-bdb-%{contrib_ver}.jar
+ln -s %{srcname}-bdb-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-bdb.jar
+cp -a build/contrib/db/bdb-je/%{srcname}-bdb-je-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-bdb-je-%{contrib_ver}.jar
+ln -s %{srcname}-bdb-je-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-bdb-je.jar
+
 # javadoc
 %if %{with javadoc}
 install -d $RPM_BUILD_ROOT%{_javadocdir}/%{srcname}-%{version}
@@ -123,3 +143,44 @@ ln -nfs %{srcname}-%{version} %{_javadocdir}/%{srcname}
 %{_javadocdir}/%{srcname}-%{version}
 %ghost %{_javadocdir}/%{srcname}
 %endif
+
+%files contrib
+%defattr(644,root,root,755)
+%{_javadir}/%{srcname}-analyzers-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-analyzers.jar
+%{_javadir}/%{srcname}-bdb-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-bdb-je-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-bdb-je.jar
+%{_javadir}/%{srcname}-bdb.jar
+%{_javadir}/%{srcname}-benchmark-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-benchmark.jar
+%{_javadir}/%{srcname}-highlighter-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-highlighter.jar
+%{_javadir}/%{srcname}-instantiated-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-instantiated.jar
+%{_javadir}/%{srcname}-lucli-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-lucli.jar
+%{_javadir}/%{srcname}-memory-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-memory.jar
+%{_javadir}/%{srcname}-misc-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-misc.jar
+%{_javadir}/%{srcname}-queries-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-queries.jar
+%{_javadir}/%{srcname}-regex-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-regex.jar
+%{_javadir}/%{srcname}-similarity-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-similarity.jar
+%{_javadir}/%{srcname}-snowball-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-snowball.jar
+%{_javadir}/%{srcname}-spellchecker-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-spellchecker.jar
+%{_javadir}/%{srcname}-surround-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-surround.jar
+%{_javadir}/%{srcname}-swing-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-swing.jar
+%{_javadir}/%{srcname}-wikipedia-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-wikipedia.jar
+%{_javadir}/%{srcname}-wordnet-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-wordnet.jar
+%{_javadir}/%{srcname}-xml-query-parser-%{contrib_ver}.jar
+%{_javadir}/%{srcname}-xml-query-parser.jar
