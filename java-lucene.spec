@@ -23,7 +23,7 @@
 Summary:	Text search engine library in Java
 Name:		java-%{srcname}
 Version:	2.4.1
-Release:	3
+Release:	4
 License:	Apache v2.0
 Group:		Development/Languages/Java
 Source0:	http://www.apache.net.pl/lucene/java/lucene-%{version}-src.tar.gz
@@ -73,6 +73,18 @@ export LC_ALL=en_US
 install -d build
 %ant -Dbuild.sysclasspath=only
 
+# Build contrib packages too
+cd contrib
+CONTRIB_PACKAGES="analyzers benchmark db highlighter instantiated lucli memory miscellaneous queries regex similarity snowball spellchecker surround swing wikipedia wordnet xml-query-parser"
+for i in $CONTRIB_PACKAGES
+do
+cd $i
+install -d build
+%ant
+cd -
+done
+
+cd ..
 %if %{with javadoc}
 %javadoc -d apidocs \
 	%{?with_java_sun:org.apache.lucene} \
