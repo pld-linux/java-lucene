@@ -30,6 +30,7 @@ Source0:	http://www.apache.net.pl/lucene/java/lucene-%{version}-src.tar.gz
 # Source0-md5:	ad46595439240e10387fcbf7647705db
 Patch0:		%{name}-test.patch
 URL:		http://lucene.apache.org/
+BuildRequires:	ant
 BuildRequires:	java-commons-digester
 %{!?with_java_sun:BuildRequires:	java-gcj-compat-devel}
 %{?with_java_sun:BuildRequires:	java-sun}
