@@ -25,8 +25,8 @@ Name:		java-%{srcname}
 Version:	2.4.1
 Release:	5
 License:	Apache v2.0
-Group:		Development/Languages/Java
-Source0:	http://www.apache.net.pl/lucene/java/lucene-%{version}-src.tar.gz
+Group:		Libraries/Java
+Source0:	http://www.apache.org/dist/lucene/java/lucene-%{version}-src.tar.gz
 # Source0-md5:	ad46595439240e10387fcbf7647705db
 Patch0:		%{name}-test.patch
 URL:		http://lucene.apache.org/
@@ -49,7 +49,7 @@ cross-platform.
 
 %package contrib
 Summary:	Contrib packages for lucene
-Group:		Development/Languages/Java
+Group:		Libraries/Java
 Requires:	%{name} = %{version}
 
 %description contrib
