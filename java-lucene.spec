@@ -11,12 +11,7 @@
 
 %bcond_without  javadoc         # don't build javadoc
 %bcond_with	java_sun	# build with java-sun
-%if "%{pld_release}" == "ti"
-%define	with_java_sun	1
-%endif
-#
 %include	/usr/lib/rpm/macros.java
-#
 %define 	srcname	lucene
 %define		contrib_ver	2.4
 
@@ -32,8 +27,7 @@ Patch0:		%{name}-test.patch
 URL:		http://lucene.apache.org/
 BuildRequires:	ant
 BuildRequires:	java-commons-digester
-%{!?with_java_sun:BuildRequires:	java-gcj-compat-devel}
-%{?with_java_sun:BuildRequires:	java-sun}
+BuildRequires:	jdk
 BuildRequires:	jpackage-utils
 BuildRequires:	rpm-javaprov
 BuildRequires:	rpmbuild(macros) >= 1.300
