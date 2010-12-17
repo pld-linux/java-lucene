@@ -18,14 +18,18 @@
 Summary:	Text search engine library in Java
 Name:		java-%{srcname}
 Version:	2.4.1
-Release:	5
+Release:	6
 License:	Apache v2.0
 Group:		Libraries/Java
 Source0:	http://www.apache.org/dist/lucene/java/lucene-%{version}-src.tar.gz
 # Source0-md5:	ad46595439240e10387fcbf7647705db
+Source1:	je-4.1.6.jar
+# Source1-md5:	b7cd75e409267b903c3cb8e1da1856e9
 Patch0:		%{name}-test.patch
+Patch1:		%{name}-je_jar.patch
 URL:		http://lucene.apache.org/
 BuildRequires:	ant
+BuildRequires:	db-java
 BuildRequires:	java-commons-digester
 BuildRequires:	jdk
 BuildRequires:	jpackage-utils
@@ -67,9 +71,14 @@ Javadoc pour lucene.
 %prep
 %setup -q -n %{srcname}-%{version}
 %patch0 -p1
+%patch1 -p1
+
+# FIXME: move je.jar to separate spec and use it via CLASSPATH
+mkdir contrib/db/bdb-je/lib
+cp %{SOURCE1} contrib/db/bdb-je/lib/je.jar
 
 %build
-CLASSPATH=$(build-classpath commons-digester)
+CLASSPATH=$(build-classpath commons-digester db)
 
 export LC_ALL=en_US
 
@@ -94,13 +103,13 @@ cd ..
 	$(find src/java/org/apache/lucene -name '*.java')
 %endif
 
-%jar -cf %{srcname}-%{version}.jar -C build/classes/java .
-
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_javadir}
-cp -a %{srcname}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-%{version}.jar
-ln -s %{srcname}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}.jar
+
+cp -a build/%{srcname}-core-2.4.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-core-%{version}.jar
+ln -s %{srcname}-core-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-core.jar
+ln -s %{srcname}-core-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}.jar
 
 # Contrib packages
 CONTRIB_PACKAGES="analyzers benchmark highlighter instantiated lucli memory misc queries regex similarity snowball spellchecker surround swing wikipedia wordnet xml-query-parser"
@@ -130,7 +139,8 @@ ln -nfs %{srcname}-%{version} %{_javadocdir}/%{srcname}
 
 %files
 %defattr(644,root,root,755)
-%{_javadir}/%{srcname}-%{version}.jar
+%{_javadir}/%{srcname}-core-%{version}.jar
+%{_javadir}/%{srcname}-core.jar
 %{_javadir}/%{srcname}.jar
 
 %if %{with javadoc}
