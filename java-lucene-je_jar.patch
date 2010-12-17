@@ -1,0 +1,11 @@
+--- lucene-2.4.1/contrib/db/bdb-je/build.xml.old	2010-12-18 01:07:44.453016955 +0100
++++ lucene-2.4.1/contrib/db/bdb-je/build.xml	2010-12-18 01:07:54.117688264 +0100
+@@ -8,7 +8,7 @@
+   <property name="je.version" value="2.0.90" />
+ 
+   <path id="je.jar">
+-    <pathelement location="lib/je-${je.version}/lib/je.jar" />
++    <pathelement location="lib/je.jar" />
+   </path>
+ 
+   <available classname="com.sleepycat.je.Database" property="je.jar.exists">
