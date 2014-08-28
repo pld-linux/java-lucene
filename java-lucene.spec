@@ -1,9 +1,8 @@
 
 # Conditional build:
 %bcond_with		javadoc		# build Lucene javadoc
-%bcond_with		contrib		# build Lucene contributed extensions
+%bcond_without		contrib		# build Lucene contributed extensions
 
-%define		contrib_ver	2.4
 %define 	srcname	lucene
 %include	/usr/lib/rpm/macros.java
 Summary:	Text search engine library in Java
@@ -12,7 +11,7 @@ Version:	3.6.2
 Release:	0.1
 License:	Apache v2.0
 Group:		Libraries/Java
-Source0:	http://www.apache.org/dist/lucene/java/%{version}/lucene-%{version}-src.tgz
+Source0:	http://archive.apache.org/dist/lucene/java/%{version}/lucene-%{version}-src.tgz
 # Source0-md5:	e438b947ab71866ee77a55248d6ec985
 Source1:	je-4.1.6.jar
 # Source1-md5:	b7cd75e409267b903c3cb8e1da1856e9
@@ -21,13 +20,15 @@ Patch1:		%{name}-je_jar.patch
 URL:		http://lucene.apache.org/
 BuildRequires:	ant
 BuildRequires:	db-java
+BuildRequires:	java-commons-compress
 BuildRequires:	java-commons-digester
+BuildRequires:	java-jtidy
 BuildRequires:	jdk
 BuildRequires:	jpackage-utils
 BuildRequires:	rpm-javaprov
 BuildRequires:	rpmbuild(macros) >= 1.300
 %if %{with contrib}
-BuildRequires:  icu4j
+BuildRequires:	java-icu4j
 %endif
 Requires:	jpackage-utils
 BuildArch:	noarch
@@ -72,25 +73,41 @@ install -d contrib/db/bdb-je/lib
 cp -p %{SOURCE1} contrib/db/bdb-je/lib/je.jar
 
 %build
-CLASSPATH=$(build-classpath commons-digester db)
+required_jars="jtidy regexp commons-digester commons-compress ivy"
+CLASSPATH=$(build-classpath $required_jars)
+export CLASSPATH
 
+# source code not US-ASCII
 export LC_ALL=en_US
 
 install -d build
 %ant \
+	-Divy.settings.file=ivy-conf.xml \
+	-Dbuild.sysclasspath=first \
+	-Djavacc.home=%{_bindir}/javacc \
+	-Djavacc.jar=%{_javadir}/javacc.jar \
+	-Djavacc.jar.dir=%{_javadir} \
+	-Djavadoc.link=file://%{_javadocdir}/java \
 	-Dversion=%{version} \
-	-Dbuild.sysclasspath=only
+	-Dfailonjavadocwarning=false \
+	-Dmaven-tasks.uptodate=true \
+	jar-lucene-core docs javadocs-core
 
 %if %{with contrib}
-cd contrib
-CONTRIB_PACKAGES="analyzers benchmark db highlighter instantiated lucli memory miscellaneous queries regex similarity snowball spellchecker surround swing wikipedia wordnet xml-query-parser"
-for i in $CONTRIB_PACKAGES; do
-	cd $i
-	install -d build
-	%ant
-	cd -
-done
-cd ..
+required_jars="jtidy regexp commons-digester commons-compress icu4j ivy"
+CLASSPATH=$(build-classpath $required_jars)
+export CLASSPATH
+%ant \
+	-Divy.settings.file=ivy-conf.xml \
+	-Dbuild.sysclasspath=first \
+	-Djavacc.home=%{_bindir}/javacc \
+	-Djavacc.jar=%{_javadir}/javacc.jar \
+	-Djavacc.jar.dir=%{_javadir} \
+	-Djavadoc.link=file://%{_javadocdir}/java \
+	-Dversion=%{version} \
+	-Dfailonjavadocwarning=false \
+	-Dmaven-tasks.uptodate=true \
+	jar-test-framework javadocs build-contrib
 %endif
 
 %if %{with javadoc}
@@ -103,21 +120,23 @@ cd ..
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_javadir}
 
-cp -a build/core/%{srcname}-core-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-core-%{version}.jar
+cp -p build/core/%{srcname}-core-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-core-%{version}.jar
 ln -s %{srcname}-core-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-core.jar
 ln -s %{srcname}-core-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}.jar
 
 %if %{with contrib}
-CONTRIB_PACKAGES="analyzers benchmark highlighter instantiated lucli memory misc queries regex similarity snowball spellchecker surround swing wikipedia wordnet xml-query-parser"
-for i in $CONTRIB_PACKAGES; do
-	cp -a build/contrib/$i/%{srcname}-$i-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-$i-%{contrib_ver}.jar
-	ln -s %{srcname}-$i-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-$i.jar
-	%jar -cf %{srcname}-$i-%{contrib_ver}.jar -C build/contrib/$i/classes/java .
+# contrib jars
+install -d $RPM_BUILD_ROOT%{_javadir}/%{srcname}-contrib
+for c in benchmark demo facet grouping highlighter icu instantiated join memory misc pruning queries queryparser remote spatial spellchecker xml-query-parser; do
+	cp -p build/contrib/$c/%{srcname}-${c}-%{version}.jar \
+		$RPM_BUILD_ROOT%{_javadir}/%{srcname}-contrib/%{srcname}-${c}.jar
 done
-cp -p build/contrib/db/bdb/%{srcname}-bdb-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-bdb-%{contrib_ver}.jar
-ln -s %{srcname}-bdb-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-bdb.jar
-cp -p build/contrib/db/bdb-je/%{srcname}-bdb-je-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-bdb-je-%{contrib_ver}.jar
-ln -s %{srcname}-bdb-je-%{contrib_ver}.jar $RPM_BUILD_ROOT%{_javadir}/%{srcname}-bdb-je.jar
+
+# contrib analyzers
+for c in analyzers kuromoji phonetic smartcn stempel; do
+	cp -p build/contrib/analyzers/*/%{srcname}-${c}-%{version}.jar \
+		$RPM_BUILD_ROOT%{_javadir}/%{srcname}-contrib/%{srcname}-${c}.jar
+done
 %endif
 
 # javadoc
@@ -149,42 +168,27 @@ ln -nfs %{srcname}-%{version} %{_javadocdir}/%{srcname}
 %if %{with contrib}
 %files contrib
 %defattr(644,root,root,755)
-%{_javadir}/%{srcname}-analyzers-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-analyzers.jar
-%{_javadir}/%{srcname}-bdb-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-bdb-je-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-bdb-je.jar
-%{_javadir}/%{srcname}-bdb.jar
-%{_javadir}/%{srcname}-benchmark-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-benchmark.jar
-%{_javadir}/%{srcname}-highlighter-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-highlighter.jar
-%{_javadir}/%{srcname}-instantiated-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-instantiated.jar
-%{_javadir}/%{srcname}-lucli-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-lucli.jar
-%{_javadir}/%{srcname}-memory-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-memory.jar
-%{_javadir}/%{srcname}-misc-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-misc.jar
-%{_javadir}/%{srcname}-queries-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-queries.jar
-%{_javadir}/%{srcname}-regex-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-regex.jar
-%{_javadir}/%{srcname}-similarity-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-similarity.jar
-%{_javadir}/%{srcname}-snowball-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-snowball.jar
-%{_javadir}/%{srcname}-spellchecker-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-spellchecker.jar
-%{_javadir}/%{srcname}-surround-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-surround.jar
-%{_javadir}/%{srcname}-swing-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-swing.jar
-%{_javadir}/%{srcname}-wikipedia-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-wikipedia.jar
-%{_javadir}/%{srcname}-wordnet-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-wordnet.jar
-%{_javadir}/%{srcname}-xml-query-parser-%{contrib_ver}.jar
-%{_javadir}/%{srcname}-xml-query-parser.jar
+%dir %{_javadir}/lucene-contrib
+%{_javadir}/%{srcname}-contrib/%{srcname}-analyzers.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-benchmark.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-demo.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-facet.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-grouping.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-highlighter.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-icu.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-instantiated.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-join.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-kuromoji.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-memory.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-misc.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-phonetic.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-pruning.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-queries.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-queryparser.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-remote.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-smartcn.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-spatial.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-spellchecker.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-stempel.jar
+%{_javadir}/%{srcname}-contrib/%{srcname}-xml-query-parser.jar
 %endif
