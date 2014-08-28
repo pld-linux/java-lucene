@@ -22,6 +22,7 @@ BuildRequires:	ant
 BuildRequires:	db-java
 BuildRequires:	java-commons-compress
 BuildRequires:	java-commons-digester
+BuildRequires:	java-ivy
 BuildRequires:	java-jtidy
 BuildRequires:	jdk
 BuildRequires:	jpackage-utils
