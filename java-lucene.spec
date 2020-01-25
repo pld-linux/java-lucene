@@ -11,7 +11,6 @@
 
 %bcond_without  javadoc         # don't build javadoc
 %bcond_with	java_sun	# build with java-sun
-%include	/usr/lib/rpm/macros.java
 %define 	srcname	lucene
 %define		contrib_ver	2.4
 
