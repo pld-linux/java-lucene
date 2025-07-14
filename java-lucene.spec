@@ -69,8 +69,8 @@ Javadoc pour lucene.
 
 %prep
 %setup -q -n %{srcname}-%{version}
-%patch0 -p1
-%patch1 -p1
+%patch -P0 -p1
+%patch -P1 -p1
 
 # FIXME: move je.jar to separate spec and use it via CLASSPATH
 mkdir contrib/db/bdb-je/lib
