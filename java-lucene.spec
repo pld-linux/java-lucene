@@ -20,7 +20,7 @@
 Summary:	Text search engine library in Java
 Name:		java-%{srcname}
 Version:	2.4.1
-Release:	7
+Release:	8
 License:	Apache v2.0
 Group:		Libraries/Java
 Source0:	http://www.apache.org/dist/lucene/java/lucene-%{version}-src.tar.gz
@@ -101,6 +101,7 @@ done
 cd ..
 %if %{with javadoc}
 %javadoc -d apidocs \
+	-Xdoclint:none \
 	%{?with_java_sun:org.apache.lucene} \
 	$(find src/java/org/apache/lucene -name '*.java')
 %endif
