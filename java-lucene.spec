@@ -11,13 +11,16 @@
 
 %bcond_without  javadoc         # don't build javadoc
 %bcond_with	java_sun	# build with java-sun
+
+%{?use_default_jdk:%use_default_jdk 8}
+
 %define 	srcname	lucene
 %define		contrib_ver	2.4
 
 Summary:	Text search engine library in Java
 Name:		java-%{srcname}
 Version:	2.4.1
-Release:	6
+Release:	7
 License:	Apache v2.0
 Group:		Libraries/Java
 Source0:	http://www.apache.org/dist/lucene/java/lucene-%{version}-src.tar.gz
@@ -30,10 +33,10 @@ URL:		http://lucene.apache.org/
 BuildRequires:	ant
 BuildRequires:	db-java
 BuildRequires:	java-commons-digester
-BuildRequires:	jdk
+%buildrequires_jdk
 BuildRequires:	jpackage-utils
 BuildRequires:	rpm-javaprov
-BuildRequires:	rpmbuild(macros) >= 1.300
+BuildRequires:	rpmbuild(macros) >= 1.556
 Requires:	jpackage-utils
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
